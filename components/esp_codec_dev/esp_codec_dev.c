@@ -175,8 +175,7 @@ int esp_codec_dev_open(esp_codec_dev_handle_t handle, esp_codec_dev_sample_info_
     }
     const audio_codec_if_t *codec = dev->codec_if;
     if (codec) {
-        // TODO not set codec fs
-        if (0 && codec->set_fs) {
+        if (codec->set_fs) {
             if (codec->set_fs(codec, fs) != 0) {
                 return ESP_CODEC_DEV_NOT_SUPPORT;
             }

@@ -184,6 +184,11 @@ static int es8311_config_fmt(audio_codec_es8311_t *codec, es_i2s_fmt_t fmt)
             dac_iface &= 0xFC;
             adc_iface |= 0x01;
             dac_iface |= 0x01;
+
+            // ES8311 has inverted LRCK in Left Justified mode
+            // Refer to EX8311 user guide chapter 7 DIGITAL AUDIO INTERFACE
+            adc_iface |= 0x20;
+            dac_iface |= 0x20;
             break;
         case ES_I2S_DSP:
             ESP_LOGD(TAG, "ES8311 in DSP-A Format");
@@ -402,7 +407,7 @@ static void es8311_pa_power(audio_codec_es8311_t *codec, es_pa_setting_t pa_sett
     }
     if (pa_setting & ES_PA_SETUP) {
         codec->cfg.gpio_if->setup(pa_pin, AUDIO_GPIO_DIR_OUT, AUDIO_GPIO_MODE_FLOAT);
-    } 
+    }
     if (pa_setting & ES_PA_ENABLE) {
         codec->cfg.gpio_if->set(pa_pin, codec->cfg.pa_reverted ? false : true);
     }
@@ -579,7 +584,7 @@ static int es8311_set_fs(const audio_codec_if_t *h, esp_codec_dev_sample_info_t 
         return ESP_CODEC_DEV_INVALID_ARG;
     }
     es8311_set_bits_per_sample(codec, fs->bits_per_sample);
-    es8311_config_fmt(codec, ES_I2S_NORMAL);
+    es8311_config_fmt(codec, ES_I2S_LEFT); // We must use Left Justified mode if we configured I2S slot with I2S_STD_MSB_SLOT_DEFAULT_CONFIG
     es8311_config_sample(codec, fs->sample_rate);
     return ESP_CODEC_DEV_OK;
 }
